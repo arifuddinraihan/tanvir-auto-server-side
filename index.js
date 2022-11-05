@@ -19,10 +19,13 @@ async function run() {
         const serviceCollection = client.db('tanvirAutosDB').collection('services')
         const orderCollection = client.db('tanvirAutosDB').collection('orders')
         app.get('/services', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
             const query = {};
             const cursor = serviceCollection.find(query);
-            const services = await cursor.toArray();
-            res.send(services)
+            const services = await cursor.skip(page*size).limit(size).toArray();
+            const count = await serviceCollection.estimatedDocumentCount()
+            res.send({count , services})
         })
 
         app.get('/services/:id', async (req, res) => {
